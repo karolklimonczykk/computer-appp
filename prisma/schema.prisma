@@ -1,0 +1,199 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// For authorization with auth.ts 
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  cart          Cart?
+  orders        Order[]
+
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// --- ENUMY -------------------------------------------------------------------
+
+enum OrderStatus {
+  PENDING // oczekujące
+  PROCESSING // w trakcie realizacji
+  SHIPPED // wysłane
+  DELIVERED // dostarczone
+  CANCELLED // anulowane
+}
+
+// --- MODELE ------------------------------------------------------------------
+
+// 1. Kategorie produktów
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique // np. "procesor", "karta graficzna" itd.
+  products Product[] // relacja 1:N z produktami
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 2. Produkty
+model Product {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique // np. "C000000091"
+  name        String
+  description String? // opis opcjonalny
+  price       Decimal  @db.Decimal(10, 2) // 2 miejsca po przecinku
+  amount      Int // stan magazynowy
+  imagePath   String? // ścieżka do obrazka (np. "public/images/...")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // relacja z kategorią (w JSON pole "type")
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  // relacje pomocnicze
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+  // code jest @unique, więc ma już indeks
+
+  @@index([categoryId])
+}
+
+// 3. Użytkownicy
+// model User {
+//   id        Int      @id @default(autoincrement())
+//   email     String   @unique
+//   fullName  String? // imię + nazwisko opcjonalne
+//   password  String // hash hasła
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   // relacje
+//   cart   Cart?
+//   orders Order[]
+// }
+
+// 4. Koszyk
+model Cart {
+  id     Int  @id @default(autoincrement())
+  userId String  @unique // 1:1 – jeden użytkownik ma dokładnie jeden koszyk
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items CartItem[]
+}
+
+// 5. Element koszyka
+model CartItem {
+  id       Int @id @default(autoincrement())
+  quantity Int @default(1)
+
+  cartId    Int
+  productId Int
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // ten sam produkt tylko raz w danym koszyku
+  @@unique([cartId, productId])
+  @@index([cartId])
+  @@index([productId])
+}
+
+// 6. Zamówienia (historia)
+model Order {
+  id          Int         @id @default(autoincrement())
+  orderNumber String      @unique // unikalny numer zamówienia
+  status      OrderStatus @default(PENDING)
+  totalAmount Decimal     @db.Decimal(10, 2) // łączna kwota
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items OrderItem[]
+  // orderNumber jest @unique, więc ma indeks
+
+  @@index([userId])
+}
+
+// 7. Pozycje w zamówieniu
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2) // cena w momencie zakupu
+
+  orderId   Int
+  productId Int
+
+  // kopie danych produktu – historia musi pozostać poprawna
+  productName String
+  productCode String
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([productId])
+}
