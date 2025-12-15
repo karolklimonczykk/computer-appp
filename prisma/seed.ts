@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // prisma/seed.ts
-import { PrismaClient } from '@/lib/generated/prisma/client';
+import { PrismaClient } from '@prisma/client';
 import fs from 'fs';
 import path from 'path';
 // 👇 U W A G A: import z wygenerowanego klienta, a NIE z '@prisma/client'
