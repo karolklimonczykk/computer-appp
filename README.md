@@ -6,7 +6,7 @@
 - year:2025/26
 - group:14K1
 - computer laboratory team:K01
-- link to app on Vercel platform:
+- link to app on Vercel platform: https://computer-appp.vercel.app/
 
 ## Content
 
