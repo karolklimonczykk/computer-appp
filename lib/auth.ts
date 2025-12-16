@@ -39,6 +39,12 @@ export const handlers = {
   POST: (req: NextRequest) => getAuth().handlers.POST(req),
 };
 
-export const auth = (...args: any[]) => getAuth().auth(...args);
-export const signIn = (...args: any[]) => getAuth().signIn(...args);
-export const signOut = (...args: any[]) => getAuth().signOut(...args);
+export const auth: ReturnType<typeof createAuth>["auth"] = (...args) =>
+  (getAuth().auth as any)(...args);
+
+export const signIn: ReturnType<typeof createAuth>["signIn"] = (...args) =>
+  (getAuth().signIn as any)(...args);
+
+export const signOut: ReturnType<typeof createAuth>["signOut"] = (...args) =>
+  (getAuth().signOut as any)(...args);
+
