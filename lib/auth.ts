@@ -3,7 +3,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
 import prisma from "./prisma";
-
+import type { NextRequest } from "next/server";
 function createAuth() {
   const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
   if (!secret) throw new Error("Missing AUTH_SECRET / NEXTAUTH_SECRET");
@@ -35,8 +35,8 @@ function getAuth() {
 }
 
 export const handlers = {
-  GET: (req: Request) => getAuth().handlers.GET(req),
-  POST: (req: Request) => getAuth().handlers.POST(req),
+  GET: (req: NextRequest) => getAuth().handlers.GET(req),
+  POST: (req: NextRequest) => getAuth().handlers.POST(req),
 };
 
 export const auth = (...args: any[]) => getAuth().auth(...args);
