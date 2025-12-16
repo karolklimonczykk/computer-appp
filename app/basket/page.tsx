@@ -9,6 +9,8 @@ import {
   getAllUsersWithCarts,
   transferCart,
 } from '@/lib/actions/cart';
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 // Server Action do obsługi transferu koszyka
 async function transferCartAction(formData: FormData) {
