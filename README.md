@@ -5,11 +5,11 @@
 ![Database](https://img.shields.io/badge/database-PostgreSQL-blue)
 ![Auth](https://img.shields.io/badge/auth-Auth.js%20(GitHub)-purple)
 
-# 💻 Computer Shop 2025KK
+# 💻 Computer Shop
 
 > Full-stack e-commerce application built with Next.js App Router, Prisma, PostgreSQL, and GitHub authentication.
 
-Computer Shop 2025KK is a full-stack web application focused on product browsing, cart management, and modern routing patterns in Next.js.
+computer-app is a full-stack web application focused on product browsing, cart management, and modern routing patterns in Next.js.
 The project combines Server Components, Client Components, Prisma data layer, and Auth.js-based authentication.
 
 In addition to standard shop features, the app demonstrates advanced routing techniques:
