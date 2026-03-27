@@ -12,12 +12,6 @@
 computer-app is a full-stack web application focused on product browsing, cart management, and modern routing patterns in Next.js.
 The project combines Server Components, Client Components, Prisma data layer, and Auth.js-based authentication.
 
-In addition to standard shop features, the app demonstrates advanced routing techniques:
-- dynamic routes,
-- catch-all routes,
-- parallel routes,
-- intercepted modal routes.
-
 ## 🎬 Live Demo
 
 - Vercel: https://computer-appp.vercel.app/
